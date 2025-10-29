@@ -20,6 +20,7 @@ __all__ = (
     'get_key',
     'humanize_disk_megabytes',
     'humanize_ram_megabytes',
+    'humanize_ram_virtualization',
     'humanize_speed',
     'icon_from_status',
     'kg_to_pounds',
@@ -226,6 +227,25 @@ def _humanize_megabytes(mb, divisor=1000):
         return f"{mb / GB_SIZE:.2f} GB"
     return f"{mb} MB"
 
+def _humanize_megabytes_virtualization(mb, divisor=1024):
+    """
+    Express a number of megabytes in the most suitable unit (e.g. gibibyte, tebibyte, etc.).
+    """
+    if not mb:
+        return ""
+
+    PB_SIZE = divisor**3
+    TB_SIZE = divisor**2
+    GB_SIZE = divisor
+
+    if mb >= PB_SIZE:
+        return f"{mb / PB_SIZE:.2f} PiB"
+    if mb >= TB_SIZE:
+        return f"{mb / TB_SIZE:.2f} TiB"
+    if mb >= GB_SIZE:
+        return f"{mb / GB_SIZE:.2f} GiB"
+    return f"{mb} MB"
+
 
 @register.filter()
 def humanize_disk_megabytes(mb):
@@ -243,6 +263,14 @@ def humanize_ram_megabytes(mb):
     Use the RAM_BASE_UNIT setting to determine the divisor. Default is 1000.
     """
     return _humanize_megabytes(mb, RAM_BASE_UNIT)
+
+@register.filter()
+def humanize_ram_virtualization(mb):
+    """
+    Express a number of megabytes in the most suitable unit as represented by virtualization platforms.
+    Uses 1024 as the divisor.
+    """
+    return _humanize_megabytes_virtualization(mb, 1024)
 
 
 @register.filter()
